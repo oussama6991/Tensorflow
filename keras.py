@@ -6,17 +6,20 @@ Created on Tue Mar 17 15:40:00 2020
 """
 
 import tensorflow as tf
-from tensorflow.keras import backend as K
+from tensorflow import keras
 from tensorflow.keras.models import load_model
-print(tf.keras.__version__)
 
-
-(train_x,train_y), (test_x, test_y) = tf.keras.datasets.mnist.load_data()
+n_classes=10
 epochs=10
 batch_size = 32
+fashion_mnist = keras.datasets.fashion_mnist
 
-train_x, test_x = tf.cast(train_x/255.0, tf.float32), tf.cast(test_x/255.0,tf.float32)
-train_y, test_y = tf.cast(train_y,tf.int64),tf.cast(test_y,tf.int64)
+(train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
+train_images = train_images / 255.0
+test_images = test_images / 255.0
+
+train_labels_ohe = tf.one_hot(train_labels, depth=n_classes).numpy()
+test_labels_ohe = tf.one_hot(test_labels, depth=n_classes).numpy()
 
 
 model = tf.keras.models.Sequential([
@@ -28,22 +31,9 @@ model = tf.keras.models.Sequential([
 optimiser = tf.keras.optimizers.Adam()
 model.compile (optimizer= optimiser,
 loss='sparse_categorical_crossentropy', metrics = ['accuracy'])
-model.fit(train_x, train_y, batch_size=batch_size, epochs=epochs)
-model.evaluate(test_x, test_y)
+model.fit(train_labels_ohe, train_labels_ohe,batch_size=batch_size, epochs=10)
+model.evaluate(test_images, test_labels)
 model.summary()
-model.save('./model')
+model.save_weights(r'C:\Users\User\Documents\weights')
 
-new_model = load_model('./model')
 
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
-model2 = tf.keras.models.Sequential([
- tf.keras.layers.Flatten(),
- tf.keras.layers.Dense(512,activation=tf.nn.relu),
- tf.keras.layers.Dropout(0.2),
- tf.keras.layers.Dense(10,activation=tf.nn.softmax)
-])
-optimiser2 = tf.keras.optimizers.Adam()
-model2.compile (optimizer= optimiser,
-loss='sparse_categorical_crossentropy', metrics = ['accuracy'])
-model2.fit(train_x, train_y, batch_size=batch_size, epochs=epochs)
-model2.evaluate(test_x, test_y)
